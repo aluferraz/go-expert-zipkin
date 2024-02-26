@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  web_prod:
+    container_name: web_prod
+    build:
+      dockerfile: Dockerfile.prod
+      context: .
+    ports:
+      - "8080:8080"
+    environment:
+      WEATHER_API_KEY: "mysupersecret"
+    depends_on:
+      - observability
+  observability:
+    container_name: observability
+    image: openzipkin/zipkin
+    ports:
+      - "9411:9411"
