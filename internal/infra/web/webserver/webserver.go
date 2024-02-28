@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/openzipkin/zipkin-go"
 	zipkinhttp "github.com/openzipkin/zipkin-go/middleware/http"
+	"github.com/rs/zerolog/log"
 	"net/http"
 )
 
@@ -68,7 +69,7 @@ func (s *WebServer) Start() error {
 			return errors.New("invalid HTTP Verb")
 		}
 	}
-
-	http.ListenAndServe(s.WebServerPort, s.Router)
-	return nil
+	log.Info().Msgf("Starting webserver at port %s", s.WebServerPort)
+	err := http.ListenAndServe(s.WebServerPort, s.Router)
+	return err
 }
