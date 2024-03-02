@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	zipcode2 "github.com/aluferraz/go-expert-zipkin/internal/entity/zipcode"
-	"github.com/aluferraz/go-expert-zipkin/internal/infra/mocks"
+	"github.com/aluferraz/go-expert-zipkin/internal/infra/http_clients"
 	"github.com/aluferraz/go-expert-zipkin/internal/usecase/get_temperature"
 	"github.com/stretchr/testify/suite"
 	"net/http"
@@ -26,7 +26,7 @@ func TestSuite(t *testing.T) {
 func (suite *TemperatureInputTestSuite) SetupSuite() {
 }
 func (s *TemperatureInputTestSuite) TestTemperatureInput() {
-	clientMock := mocks.NewZipkinMockClient()
+	clientMock := http_clients.NewZipkinMockClient()
 	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
 	rr := httptest.NewRecorder()
 	// Mock API responses

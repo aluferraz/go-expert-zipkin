@@ -3,10 +3,12 @@
 O Serviço A roda no endpoint "/"
 O Serviço B roda no endpoint "/servicoB"
 
-Zipkin middleware injetado no servidor no arquivo "cmd/go_expert_zipkin"
-Zipkin client usado em todas as requisiçoes
+Zipkin middleware injetado no servidor no arquivo "cmd/webserver/webserver"
+Zipkin client usado em todas as requisiçoes "internal/infra/http_clients/ZipkinOtelClient"
 
 Os logs ficam disponiveis em http://127.0.0.1:9411
+
+![traces](./screenshot.png)
 
 
 Variáveis de ambiente:
@@ -42,4 +44,6 @@ Para executar a versão em dev:
 ``docker compose up``
 
 Para executar a versão em prd (lembre-se de configurar a variavel de ambiente no docker-compose):
-``docker compose -f docker-compose.prod.yml up ``
+``
+docker compose -f docker-compose.prod.yml build --no-cache
+docker compose -f docker-compose.prod.yml up ``

@@ -4,20 +4,20 @@ import (
 	"encoding/json"
 	"errors"
 	zipcode2 "github.com/aluferraz/go-expert-zipkin/internal/entity/zipcode"
-	"github.com/aluferraz/go-expert-zipkin/internal/infra/mocks"
+	"github.com/aluferraz/go-expert-zipkin/internal/infra/http_clients"
 	"github.com/aluferraz/go-expert-zipkin/internal/usecase/get_temperature"
 	"net/http"
 )
 
 type WebGetTemperatureHandler struct {
 	usecase       get_temperature.UseCase
-	client        mocks.ZipkinClientInterface
+	client        http_clients.ZipkinClientInterface
 	WeatherApiKey string
 	WeatherApiUrl string
 	ApiCepUrl     string
 }
 
-func NewGetTemperatureHandler(usecase get_temperature.UseCase, client mocks.ZipkinClientInterface,
+func NewGetTemperatureHandler(usecase get_temperature.UseCase, client http_clients.ZipkinClientInterface,
 ) *WebGetTemperatureHandler {
 	return &WebGetTemperatureHandler{
 		usecase: usecase,

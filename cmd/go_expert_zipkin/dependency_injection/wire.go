@@ -5,16 +5,16 @@ package dependency_injection
 
 import (
 	"context"
-	"github.com/aluferraz/go-expert-zipkin/internal/infra/mocks"
+	"github.com/aluferraz/go-expert-zipkin/internal/infra/http_clients"
 	"github.com/aluferraz/go-expert-zipkin/internal/infra/web/webhandlers/get_temperature_handler"
 	"github.com/aluferraz/go-expert-zipkin/internal/usecase/get_temperature"
 	"github.com/google/wire"
 )
 
-func NewTemperatureUseCase(client mocks.ZipkinClientInterface) get_temperature.UseCase {
+func NewTemperatureUseCase(client http_clients.ZipkinClientInterface) get_temperature.UseCase {
 	return get_temperature.NewUseCase(client)
 }
-func NewTemperatureHandler(ctx *context.Context, client mocks.ZipkinClientInterface) *get_temperature_handler.WebGetTemperatureHandler {
+func NewTemperatureHandler(ctx *context.Context, client http_clients.ZipkinClientInterface) *get_temperature_handler.WebGetTemperatureHandler {
 	wire.Build(NewTemperatureUseCase, get_temperature_handler.NewGetTemperatureHandler)
 	return &get_temperature_handler.WebGetTemperatureHandler{}
 }

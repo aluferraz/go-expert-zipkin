@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 	"os"
 	"path"
@@ -35,19 +36,21 @@ func LoadConfig(workdir string) (*conf, error) {
 	viper.SetConfigName("app_config")
 	_, err := os.Stat(path.Join(workdir, ".env"))
 	if err == nil {
+
+		log.Info().Msg(".env found!")
 		viper.SetConfigType("env")
 		viper.AddConfigPath(workdir)
 		viper.SetConfigFile(".env")
 		err = viper.ReadInConfig()
 		if err != nil {
-			panic(err)
+			log.Panic().Err(err)
 		}
 	}
 	viper.AutomaticEnv()
 	err = defaultAndBindings()
 	err = viper.Unmarshal(&cfg)
 	if err != nil {
-		panic(err)
+		log.Panic().Err(err)
 	}
 	return cfg, err
 }

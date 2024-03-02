@@ -5,8 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aluferraz/go-expert-zipkin/internal/entity/zipcode"
-	"github.com/aluferraz/go-expert-zipkin/internal/infra/mocks"
-	"github.com/openzipkin/zipkin-go"
+	"github.com/aluferraz/go-expert-zipkin/internal/infra/http_clients"
 	"io"
 	"net/http"
 	"net/url"
@@ -31,11 +30,11 @@ type OutputDTO struct {
 }
 
 type UseCase struct {
-	client mocks.ZipkinClientInterface
+	client http_clients.ZipkinClientInterface
 }
 
 func NewUseCase(
-	client mocks.ZipkinClientInterface,
+	client http_clients.ZipkinClientInterface,
 ) UseCase {
 	return UseCase{
 		client: client,
@@ -45,15 +44,10 @@ func NewUseCase(
 func (uc *UseCase) getCityFromZipCode(apiUrl string, zipcode string, ctx *context.Context) (string, error) {
 	// "https://viacep.com.br/ws/%s/json/"
 
-	newRequest, err := http.NewRequest("GET", fmt.Sprintf(apiUrl, zipcode), nil)
+	newRequest, err := http.NewRequestWithContext(*ctx, "GET", fmt.Sprintf(apiUrl, zipcode), nil)
 	if err != nil {
 		return "", err
 	}
-	// retrieve span from context (created by server middleware)
-	span := zipkin.SpanFromContext(*ctx)
-	ctxReq := zipkin.NewContext(newRequest.Context(), span)
-	newRequest = newRequest.WithContext(ctxReq)
-
 	resp, err := uc.client.DoWithAppSpan(newRequest, "viacep")
 	if err != nil {
 		return "", err
@@ -74,14 +68,10 @@ func (uc *UseCase) getTemperatureFromCity(apiUrl string, apikey string, city str
 	//"http://api.weatherapi.com/v1/current.json?key=%s&q=%s"
 	url := fmt.Sprintf(apiUrl, url.QueryEscape(apikey), url.QueryEscape(city))
 
-	newRequest, err := http.NewRequest("GET", url, nil)
+	newRequest, err := http.NewRequestWithContext(*ctx, "GET", url, nil)
 	if err != nil {
 		return 0, err
 	}
-	// retrieve span from context (created by server middleware)
-	span := zipkin.SpanFromContext(*ctx)
-	ctxReq := zipkin.NewContext(newRequest.Context(), span)
-	newRequest = newRequest.WithContext(ctxReq)
 
 	resp, err := uc.client.DoWithAppSpan(newRequest, "weather_api")
 	if err != nil {

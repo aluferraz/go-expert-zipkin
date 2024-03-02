@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	zipcode2 "github.com/aluferraz/go-expert-zipkin/internal/entity/zipcode"
-	"github.com/aluferraz/go-expert-zipkin/internal/infra/mocks"
+	"github.com/aluferraz/go-expert-zipkin/internal/infra/http_clients"
 	"github.com/stretchr/testify/suite"
 	"net/http"
 	"net/http/httptest"
@@ -14,7 +14,7 @@ import (
 type GetTemperatureTestSuite struct {
 	suite.Suite
 	ctx    context.Context
-	client mocks.ZipkinClientInterface
+	client http_clients.ZipkinClientInterface
 }
 
 func TestSuite(t *testing.T) {
@@ -23,7 +23,7 @@ func TestSuite(t *testing.T) {
 
 func (suite *GetTemperatureTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
-	suite.client = mocks.NewZipkinMockClient()
+	suite.client = http_clients.NewZipkinMockClient()
 }
 
 // Test case for getCityFromZipCode function using mock server

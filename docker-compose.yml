@@ -1,16 +1,26 @@
 version: '3.8'
 services:
-  web:
-    container_name: web
+  web_a:
+    container_name: web_a
     build: .
     ports:
       - "8080:8080"
-#    Use .env or here
-#    environment:
-#      WEATHER_API_KEY: "mysupersecret"
     command: "go run main.go"
     volumes:
-      - .:/app
+      - .:/app:ro
+    depends_on:
+      - observability
+      - web_b
+  web_b:
+    container_name: web_b
+    build: .
+    ports:
+      - "8090:8080"
+    #    environment:
+    #      WEATHER_API_KEY: "mysupersecret"
+    command: "go run main.go"
+    volumes:
+      - .:/app:ro
     depends_on:
       - observability
   observability:
@@ -18,3 +28,5 @@ services:
     image: openzipkin/zipkin
     ports:
       - "9411:9411"
+volumes:
+  app-volume:

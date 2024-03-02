@@ -2,42 +2,42 @@ package webserver
 
 import (
 	"errors"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"github.com/gorilla/mux"
 	"github.com/openzipkin/zipkin-go"
-	zipkinhttp "github.com/openzipkin/zipkin-go/middleware/http"
 	"github.com/rs/zerolog/log"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 	"net/http"
 )
 
 type RESTEndpoint struct {
-	urlpath string
-	verb    string
+	urlpath     string
+	verb        string
+	requestName string
 }
 
 type WebServer struct {
-	Router        chi.Router
+	Router        *mux.Router
 	Handlers      map[RESTEndpoint]http.HandlerFunc
 	WebServerPort string
-	tracer        *zipkin.Tracer
+	Tracer        *zipkin.Tracer
 }
 
-func NewWebServer(serverPort string, tracer *zipkin.Tracer) *WebServer {
+func NewWebServer(serverPort string) *WebServer {
 	if string(serverPort[0]) != ":" {
 		serverPort = ":" + serverPort
 	}
 	return &WebServer{
-		Router:        chi.NewRouter(),
+		Router:        mux.NewRouter(),
 		Handlers:      make(map[RESTEndpoint]http.HandlerFunc),
 		WebServerPort: serverPort,
-		tracer:        tracer,
 	}
 }
 
-func (s *WebServer) AddHandler(urlpath string, verb string, handler http.HandlerFunc) {
+func (s *WebServer) AddHandler(urlpath string, verb string, handler http.HandlerFunc, requestName string) {
 	s.Handlers[RESTEndpoint{
-		urlpath: urlpath,
-		verb:    verb,
+		urlpath:     urlpath,
+		verb:        verb,
+		requestName: requestName,
 	}] = handler
 }
 
@@ -45,26 +45,22 @@ func (s *WebServer) AddHandler(urlpath string, verb string, handler http.Handler
 // register middeleware logger
 // start the server
 func (s *WebServer) Start() error {
-	s.Router.Use(middleware.Logger)
-	// create global zipkin http server middleware
-	serverMiddleware := zipkinhttp.NewServerMiddleware(
-		s.tracer, zipkinhttp.TagResponseSize(true),
-	)
-	s.Router.Use(serverMiddleware)
+	s.Router.Use(otelmux.Middleware("zipkin-goexpert"))
 
 	for restEndpointInfo, handler := range s.Handlers {
 		urlpath := restEndpointInfo.urlpath
+
 		switch verb := restEndpointInfo.verb; verb {
 		case http.MethodGet:
-			s.Router.Get(urlpath, handler)
+			s.Router.HandleFunc(urlpath, handler).Methods(http.MethodGet)
 		case http.MethodPost:
-			s.Router.Post(urlpath, handler)
+			s.Router.HandleFunc(urlpath, handler).Methods(http.MethodPost)
 		case http.MethodPut:
-			s.Router.Put(urlpath, handler)
+			s.Router.HandleFunc(urlpath, handler).Methods(http.MethodPut)
 		case http.MethodPatch:
-			s.Router.Patch(urlpath, handler)
+			s.Router.HandleFunc(urlpath, handler).Methods(http.MethodPatch)
 		case http.MethodDelete:
-			s.Router.Delete(urlpath, handler)
+			s.Router.HandleFunc(urlpath, handler).Methods(http.MethodDelete)
 		default:
 			return errors.New("invalid HTTP Verb")
 		}
