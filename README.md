@@ -43,8 +43,8 @@ Para executar a versão em dev:
 
 Para executar a versão em prd (lembre-se de configurar a variavel de ambiente no docker-compose):
 
-``
+```
 docker compose -f docker-compose.prod.yml build --no-cache
 
 docker compose -f docker-compose.prod.yml up 
-``
+```
