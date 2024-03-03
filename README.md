@@ -45,5 +45,6 @@ Para executar a versão em prd (lembre-se de configurar a variavel de ambiente n
 
 ``
 docker compose -f docker-compose.prod.yml build --no-cache
+
 docker compose -f docker-compose.prod.yml up 
 ``
