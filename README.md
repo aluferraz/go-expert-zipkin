@@ -3,8 +3,8 @@
 O Serviço A roda no endpoint "/"
 O Serviço B roda no endpoint "/servicoB"
 
-Zipkin middleware injetado no servidor no arquivo "cmd/webserver/webserver"
-Zipkin client usado em todas as requisiçoes "internal/infra/http_clients/ZipkinOtelClient"
+Zipkin middleware injetado no servidor no arquivo [webserver.go](https://github.com/aluferraz/go-expert-zipkin/blob/45fff0294478ba61b5a7ca481aee9f9b93e0c1f3/internal/infra/web/webserver/webserver.go#L48C2-L49C1)
+Zipkin client usado em todas as requisiçoes [ZipkinOtelClient.go](https://github.com/aluferraz/go-expert-zipkin/blob/45fff0294478ba61b5a7ca481aee9f9b93e0c1f3/internal/infra/http_clients/ZipkinOtelClient.go#L1)
 
 Os logs ficam disponiveis em http://127.0.0.1:9411
 
@@ -30,7 +30,7 @@ O projeto possui testes integrados ao github actions e também pode ser testado 
 Clonar o repositório
 
 Preencha sua API_KEY no docker-compose:
-[https://github.com/aluferraz/go-expert-zipkin/blob/48e1a7ade24732f5b557370e27d5546d06406ab1/docker-compose.yml#L8C1-L9C39](https://github.com/aluferraz/go-expert-zipkin/blob/3ba456c240eaf155cb748d7a21df7ef5133873c9/docker-compose.prod.yml#L10-L23)
+[docker-compose.prod.yml](https://github.com/aluferraz/go-expert-zipkin/blob/3ba456c240eaf155cb748d7a21df7ef5133873c9/docker-compose.prod.yml#L10-L23)
 
 Em desenvolvimento, voce também pode criar um arquivo .env na raíz do projeto:
 ```
