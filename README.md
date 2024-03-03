@@ -4,6 +4,7 @@ O Serviço A roda no endpoint "/"
 O Serviço B roda no endpoint "/servicoB"
 
 Zipkin middleware injetado no servidor no arquivo [webserver.go](https://github.com/aluferraz/go-expert-zipkin/blob/45fff0294478ba61b5a7ca481aee9f9b93e0c1f3/internal/infra/web/webserver/webserver.go#L48C2-L49C1)
+
 Zipkin client usado em todas as requisiçoes [ZipkinOtelClient.go](https://github.com/aluferraz/go-expert-zipkin/blob/45fff0294478ba61b5a7ca481aee9f9b93e0c1f3/internal/infra/http_clients/ZipkinOtelClient.go#L1)
 
 Os logs ficam disponiveis em http://127.0.0.1:9411
