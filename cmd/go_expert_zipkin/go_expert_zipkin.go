@@ -9,14 +9,16 @@ import (
 	"github.com/aluferraz/go-expert-zipkin/internal/infra/web/webhandlers/temperature_input"
 	"github.com/aluferraz/go-expert-zipkin/internal/infra/web/webserver"
 	"go.opentelemetry.io/contrib/propagators/b3"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
-
+	"google.golang.org/grpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"github.com/rs/zerolog/log"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/zipkin"
+	//"go.opentelemetry.io/otel/exporters/zipkin"
 	"go.opentelemetry.io/otel/sdk/resource"
-	"go.opentelemetry.io/otel/sdk/trace"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"net/http"
 	"os"
 )
@@ -27,7 +29,7 @@ func handleErr(err error) {
 	}
 }
 
-const endpointURL = "http://observability:9411/api/v2/spans"
+const endpointURL = "otel-collector:4317"
 
 func Bootstap() {
 	workdir, err := os.Getwd()
@@ -39,7 +41,7 @@ func Bootstap() {
 
 	ctx := context.Background()
 	// Initialize OpenTelemetry Tracer Provider
-	shutdown := initTracer()
+	shutdown := initTracer(ctx)
 	defer shutdown(context.Background())
 
 	// create global zipkin traced http client
@@ -66,14 +68,20 @@ func Bootstap() {
 	restServer.Start()
 
 }
-func initTracer() func(context.Context) error {
-	exporter, err := zipkin.New(
-		endpointURL,
-		// Additional Zipkin exporter options if desired
-	)
+func initTracer(ctx context.Context) func( context.Context) error {
+	//exporter, err := zipkin.New(
+	//	endpointURL,
+	//	// Additional Zipkin exporter options if desired
+	//)
+	traceClient := otlptracegrpc.NewClient(
+		otlptracegrpc.WithInsecure(),
+		otlptracegrpc.WithEndpoint(endpointURL),
+		otlptracegrpc.WithDialOption(grpc.WithBlock()))
+	exporter, err := otlptrace.New(ctx, traceClient)
 	if err != nil {
-		log.Fatal().Msgf("failed to create Zipkin exporter: %v", err)
+		log.Fatal().Msgf("failed to create Otel exporter: %v", err)
 	}
+	bsp := sdktrace.NewBatchSpanProcessor(exporter)
 
 	// Create a resource with service details
 	res, err := resource.New(context.Background(),
@@ -86,10 +94,11 @@ func initTracer() func(context.Context) error {
 		log.Fatal().Msgf("failed to create resource: %v", err)
 	}
 
-	tp := trace.NewTracerProvider(
-		trace.WithBatcher(exporter),
-		trace.WithResource(res),
-		trace.WithSampler(trace.AlwaysSample()),
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithResource(res),
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithSpanProcessor(bsp),
 	)
 	otel.SetTracerProvider(tp)
 	propagator := b3.New(b3.WithInjectEncoding(b3.B3MultipleHeader | b3.B3SingleHeader))
