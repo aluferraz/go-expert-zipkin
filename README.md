@@ -1,11 +1,14 @@
 # Busca CEP  - Zipkin
 
 O Serviço A roda no endpoint "/"
+
 O Serviço B roda no endpoint "/servicoB"
 
-Zipkin middleware injetado no servidor no arquivo [webserver.go](https://github.com/aluferraz/go-expert-zipkin/blob/45fff0294478ba61b5a7ca481aee9f9b93e0c1f3/internal/infra/web/webserver/webserver.go#L48C2-L49C1)
+Otel grpc exporter criado no go_expert_zipkin.go
 
-Zipkin client usado em todas as requisiçoes [ZipkinOtelClient.go](https://github.com/aluferraz/go-expert-zipkin/blob/45fff0294478ba61b5a7ca481aee9f9b93e0c1f3/internal/infra/http_clients/ZipkinOtelClient.go#L1)
+Otel middleware injetado no servidor no arquivo [webserver.go](https://github.com/aluferraz/go-expert-zipkin/blob/45fff0294478ba61b5a7ca481aee9f9b93e0c1f3/internal/infra/web/webserver/webserver.go#L48C2-L49C1)
+
+Otel client usado em todas as requisiçoes [ZipkinOtelClient.go](https://github.com/aluferraz/go-expert-zipkin/blob/45fff0294478ba61b5a7ca481aee9f9b93e0c1f3/internal/infra/http_clients/ZipkinOtelClient.go#L1)
 
 Os logs ficam disponiveis em http://127.0.0.1:9411
 
@@ -39,7 +42,10 @@ WEATHER_API_KEY=mysupersecret
 ```
 
 Para executar a versão em dev:
-``docker compose up``
+```
+docker compose build --no-cache
+docker compose up
+```
 
 Para executar a versão em prd (lembre-se de configurar a variavel de ambiente no docker-compose):
 
