@@ -4,7 +4,7 @@ O Serviço A roda no endpoint "/"
 
 O Serviço B roda no endpoint "/servicoB"
 
-Otel grpc exporter criado no go_expert_zipkin.go
+Otel grpc exporter criado no [go_expert_zipkin.go](https://github.com/aluferraz/go-expert-zipkin/blob/d74f7b94311e307028e6734fda4f004931628b54/cmd/go_expert_zipkin/go_expert_zipkin.go#L76C1-L79C50)
 
 Otel middleware injetado no servidor no arquivo [webserver.go](https://github.com/aluferraz/go-expert-zipkin/blob/45fff0294478ba61b5a7ca481aee9f9b93e0c1f3/internal/infra/web/webserver/webserver.go#L48C2-L49C1)
 
