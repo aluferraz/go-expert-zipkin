@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"encoding/json"
 )
 
 type WebTemperatureInputHandler struct {
@@ -15,7 +16,11 @@ type WebTemperatureInputHandler struct {
 	client      http_clients.ZipkinClientInterface
 }
 type InputDTO struct {
-	Zipcode zipcode2.Zipcode
+	Zipcode zipcode2.Zipcode `json:"cep"`
+}
+
+type FreeTextInput struct {
+	Zipcode string `json:"cep"`
 }
 
 func NewTemperatureInputHandler(
@@ -30,10 +35,11 @@ func NewTemperatureInputHandler(
 
 func (h *WebTemperatureInputHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	var dto get_temperature.InputDTO
+	var user_input FreeTextInput
 	var err error
-
-	zipcode_url := r.URL.Query().Get("zipcode")
-	zipcode, err := zipcode2.NewZipcode(zipcode_url)
+	// zipcode_url := r.URL.Query().Get("zipcode")
+	err = json.NewDecoder(r.Body).Decode(&user_input)
+	zipcode, err := zipcode2.NewZipcode(user_input.Zipcode)
 	if err != nil {
 		/*http.Error(w, err.Error(), http.StatusBadRequest)*/
 		http.Error(w, "invalid zipcode", http.StatusBadRequest)

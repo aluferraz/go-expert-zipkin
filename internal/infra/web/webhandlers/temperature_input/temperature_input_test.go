@@ -50,8 +50,8 @@ func (s *TemperatureInputTestSuite) TestTemperatureInput() {
 
 	jsonStr, err := json.Marshal(input)
 	s.NoError(err)
-	req, err := http.NewRequest("GET", fmt.Sprintf("/?zipcode=%s", zipcode.Zipcode), bytes.NewBuffer(jsonStr))
-
+	//req, err := http.NewRequest("GET", fmt.Sprintf("/?zipcode=%s", zipcode.Zipcode), bytes.NewBuffer(jsonStr))
+	req, err := http.NewRequest("POST", fmt.Sprintf("/"), bytes.NewBuffer(jsonStr))
 	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
 	// directly and pass in our Request and ResponseRecorder.
 	handler.Handle(rr, req)

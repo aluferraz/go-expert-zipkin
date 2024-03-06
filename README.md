@@ -55,4 +55,4 @@ docker compose -f docker-compose.prod.yml build --no-cache
 docker compose -f docker-compose.prod.yml up 
 ```
 
-Para testar http://localhost:8080/?zipcode=30140091
+Para testar execute o arquivo api/cep.http
