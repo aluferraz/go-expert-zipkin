@@ -64,7 +64,7 @@ func Bootstap() {
 		client,
 	)
 
-	restServer.AddHandler("/", http.MethodGet, temperatureInputHandler.Handle, "servicoA")
+	restServer.AddHandler("/", http.MethodPost, temperatureInputHandler.Handle, "servicoA")
 	restServer.Start()
 
 }
