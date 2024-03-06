@@ -1,65 +1,72 @@
-package get_temperature_handler
+package temperature_input
 
 import (
-	"encoding/json"
-	"errors"
+	"fmt"
 	zipcode2 "github.com/aluferraz/go-expert-zipkin/internal/entity/zipcode"
 	"github.com/aluferraz/go-expert-zipkin/internal/infra/http_clients"
 	"github.com/aluferraz/go-expert-zipkin/internal/usecase/get_temperature"
+	"io"
 	"net/http"
+	"net/url"
+	"encoding/json"
 )
 
-type WebGetTemperatureHandler struct {
-	usecase       get_temperature.UseCase
-	client        http_clients.ZipkinClientInterface
-	WeatherApiKey string
-	WeatherApiUrl string
-	ApiCepUrl     string
+type WebTemperatureInputHandler struct {
+	service2Url string
+	client      http_clients.ZipkinClientInterface
+}
+type InputDTO struct {
+	Zipcode zipcode2.Zipcode `json:"cep"`
 }
 
-func NewGetTemperatureHandler(usecase get_temperature.UseCase, client http_clients.ZipkinClientInterface,
-) *WebGetTemperatureHandler {
-	return &WebGetTemperatureHandler{
-		usecase: usecase,
-		client:  client,
+type FreeTextInput struct {
+	Zipcode string `json:"cep"`
+}
+
+func NewTemperatureInputHandler(
+	service2Url string,
+	client http_clients.ZipkinClientInterface,
+) *WebTemperatureInputHandler {
+	return &WebTemperatureInputHandler{
+		service2Url: service2Url,
+		client:      client,
 	}
 }
 
-func (h *WebGetTemperatureHandler) Handle(w http.ResponseWriter, r *http.Request) {
+func (h *WebTemperatureInputHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	var dto get_temperature.InputDTO
+	var user_input FreeTextInput
 	var err error
-
-	zipcode_url := r.URL.Query().Get("zipcode")
-	zipcode, err := zipcode2.NewZipcode(zipcode_url)
+	// zipcode_url := r.URL.Query().Get("zipcode")
+	err = json.NewDecoder(r.Body).Decode(&user_input)
+	zipcode, err := zipcode2.NewZipcode(user_input.Zipcode)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		/*http.Error(w, err.Error(), http.StatusBadRequest)*/
+		http.Error(w, "invalid zipcode", http.StatusBadRequest)
 		return
 	}
 	dto = get_temperature.InputDTO{
 		Zipcode: zipcode,
 	}
 
-	dto.WeatherApiKey = h.WeatherApiKey
-	dto.WeatherApiUrl = h.WeatherApiUrl
-	dto.ApiCepUrl = h.ApiCepUrl
-	ctx := r.Context()
-	dto.Ctx = &ctx
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	output, err := h.usecase.Execute(dto)
-
+	url := fmt.Sprintf("%s?zipcode=%s", h.service2Url, url.QueryEscape(dto.Zipcode.Zipcode))
+	newRequest, err := http.NewRequestWithContext(r.Context(), "GET", url, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if output.City == "" {
-		http.Error(w, errors.New("can not find zipcode").Error(), http.StatusNotFound)
+
+	resp, err := h.client.DoWithAppSpan(newRequest, "servico_b")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = json.NewEncoder(w).Encode(output)
+	defer func(Body io.ReadCloser) {
+		Body.Close()
+	}(resp.Body)
+
+	body, _ := io.ReadAll(resp.Body)
+	_, err = w.Write(body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
