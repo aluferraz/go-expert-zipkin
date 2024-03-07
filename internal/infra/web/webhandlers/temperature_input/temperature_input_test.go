@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	zipcode2 "github.com/aluferraz/go-expert-zipkin/internal/entity/zipcode"
 	"github.com/aluferraz/go-expert-zipkin/internal/infra/http_clients"
 	"github.com/aluferraz/go-expert-zipkin/internal/usecase/get_temperature"
 	"github.com/stretchr/testify/suite"
@@ -39,19 +38,13 @@ func (s *TemperatureInputTestSuite) TestTemperatureInput() {
 
 	defer mockWeatherApiServer.Close()
 
-	zipcode, err := zipcode2.NewZipcode("12345678")
-	s.NoError(err)
 
 	// Create a test inputDTO with the URLs of the mock servers
-	input := get_temperature.InputDTO{
-		Zipcode: zipcode,
-	}
+
 	handler := NewTemperatureInputHandler(mockWeatherApiServer.URL, clientMock)
 
-	jsonStr, err := json.Marshal(input)
-	s.NoError(err)
 	//req, err := http.NewRequest("GET", fmt.Sprintf("/?zipcode=%s", zipcode.Zipcode), bytes.NewBuffer(jsonStr))
-	req, err := http.NewRequest("POST", fmt.Sprintf("/"), bytes.NewBuffer(jsonStr))
+	req, err := http.NewRequest("POST", fmt.Sprintf("/"), bytes.NewBuffer([]byte("{\"cep\": \"30140091\"}")))
 	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
 	// directly and pass in our Request and ResponseRecorder.
 	handler.Handle(rr, req)
